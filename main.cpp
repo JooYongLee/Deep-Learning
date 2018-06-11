@@ -188,9 +188,19 @@ int TensorflowImportTest(int argc, char *argv[])
 	cv::TickMeter tm;
 	//! [Initialize network]
 	tm.start();
-	dnn::Net net = readNetFromTensorflow(modelFile);
-	tm.stop();
-	std::cout << "read net from tensorflow, ms: " << tm.getTimeMilli()  << std::endl;
+    dnn::Net net ;
+	try		
+	{
+		net = readNetFromTensorflow(modelFile);
+	}
+	catch( cv::Exception& e )
+	{
+		const char* err_msg = e.what();
+		printf("----------------------------------\n");
+		std::cout << "exception caught: " << err_msg << std::endl;
+		system("pause");
+		return 0;
+	}
 
 	tm.start();
 
@@ -214,7 +224,7 @@ int TensorflowImportTest(int argc, char *argv[])
 
 	while(iter++<maxiter)
 	{
-		int id = rand() % flist.size();
+		
 		//Mat img = imread(flist[id]);
 		Mat img = cv::Mat(height,width,CV_32FC1, fbuff );
 		cv::Mat normimg;
@@ -281,15 +291,11 @@ int TensorflowImportTest(int argc, char *argv[])
 		elapsetime = tm.getTimeMilli();
 		if( iter != 1 )
 			avgttact += dt;
-		if (!classNamesFile.empty()) {
-			std::vector<String> classNames = readClassNames(classNamesFile.c_str());
-
+		{
 			int classId;
 			double classProb;
 			getMaxClass(result, &classId, &classProb);//find the best class
-			//std::cout<<result;
-
-			//! [Print results]
+			
 			std::cout << "Best class: #" << classId << " '" <<endl;
 			std::cout << "Probability: " << classProb * 100 << "%" << std::endl;
 		}
